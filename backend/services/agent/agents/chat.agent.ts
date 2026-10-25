@@ -1,5 +1,17 @@
+import type { BaseMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
 import { getLLMModel } from "../config/llmModels.ts";
 import { type AgentState } from "../graph/state.ts";
+import { getConversationMemory } from "../config/memory.ts";
+
+export interface IMessage {
+  role: "user" | "assistant";
+  content: string;
+}
 
 export const chatAgent = async (state: AgentState) => {
   const llm = getLLMModel("chat");
@@ -23,10 +35,24 @@ export const chatAgent = async (state: AgentState) => {
 - Never write headings and content on the same line.
 - Never generate large walls of text.`;
 
-  const response = await llm.invoke([
-    { role: "user", content: state.prompt },
-    { role: "system", content: systemPrompt },
-  ]);
+  const history: BaseMessage[] = [new SystemMessage(systemPrompt)];
+
+  const messages = await getConversationMemory(
+    state.conversationId,
+    state.userId,
+  );
+
+  messages.forEach((message: IMessage) => {
+    if (message.role === "user") {
+      history.push(new HumanMessage(message.content));
+    } else {
+      history.push(new AIMessage(message.content));
+    }
+  });
+
+  history.push(new HumanMessage(state.prompt));
+
+  const response = await llm.invoke(history);
 
   return {
     ...state,

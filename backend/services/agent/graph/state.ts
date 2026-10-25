@@ -5,6 +5,7 @@ export const agentState = Annotation.Root({
   aiResponse: Annotation<string>(),
   agent: Annotation<string>(),
   conversationId: Annotation<string>(),
+  userId: Annotation<string>(),
 });
 
 export type AgentState = typeof agentState.State;
