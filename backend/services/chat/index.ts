@@ -2,6 +2,7 @@ import express, { type Request, type Response } from "express";
 import dotenv from "dotenv";
 import { connectToDB } from "./config/db.ts";
 import router from "./routes/route.ts";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -10,6 +11,7 @@ dotenv.config();
 const PORT = process.env.PORT || 8002;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use("/", router);
 
 app.get("/", (req: Request, res: Response) => {

@@ -35,8 +35,16 @@ app.use(
 
 // Other microservices
 app.use("/api/auth", proxy(process.env.AUTH_SERVICE_URL!));
-app.use("/api/agent", protect, proxy(process.env.AGENT_SERVICE_URL!));
-app.use("/api/billing", protect, proxy(process.env.BILLING_SERVICE_URL!));
+app.use(
+  "/api/agent",
+  protect,
+  createAuthenticatedProxy(process.env.AGENT_SERVICE_URL!),
+);
+app.use(
+  "/api/billing",
+  protect,
+  createAuthenticatedProxy(process.env.BILLING_SERVICE_URL!),
+);
 
 app.get("/", (req: Request, res: Response) => {
   return res.status(200).json({ message: "Gateway is running" });

@@ -15,16 +15,14 @@ const getUserIdFromHeader = (req: Request): string | null => {
   return null;
 };
 
-export const saveMessage = async (
-  req: Request,
-  res: Response,
-) => {
+export const saveMessage = async (req: Request, res: Response) => {
   try {
     const userId = getUserIdFromHeader(req);
     if (!userId) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: Missing x-user-id header" });
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Missing x-user-id header",
+      });
     }
 
     const { conversationId, role, content } = saveMessageSchema.parse(req.body);
@@ -63,7 +61,10 @@ export const saveMessage = async (
       return res.status(400).json({
         success: false,
         message: "Validation error",
-        errors: error.issues.map((i) => ({ field: i.path.join("."), message: i.message })),
+        errors: error.issues.map((i) => ({
+          field: i.path.join("."),
+          message: i.message,
+        })),
       });
     }
 
@@ -75,16 +76,14 @@ export const saveMessage = async (
   }
 };
 
-export const getMessages = async (
-  req: Request,
-  res: Response,
-) => {
+export const getMessages = async (req: Request, res: Response) => {
   try {
     const userId = getUserIdFromHeader(req);
     if (!userId) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: Missing x-user-id header" });
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Missing x-user-id header",
+      });
     }
 
     const { conversationId } = conversationIdParamSchema.parse(req.params);
@@ -115,7 +114,10 @@ export const getMessages = async (
       return res.status(400).json({
         success: false,
         message: "Invalid parameters",
-        errors: error.issues.map((i) => ({ field: i.path.join("."), message: i.message })),
+        errors: error.issues.map((i) => ({
+          field: i.path.join("."),
+          message: i.message,
+        })),
       });
     }
 

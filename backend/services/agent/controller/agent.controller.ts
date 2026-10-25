@@ -6,7 +6,14 @@ export const agent = async (req: Request, res: Response) => {
   try {
     const { prompt, conversationId } = req.body;
 
-    await axios.post(`${process.env.CHAT_SERVICE_URL}/messages`, {
+    const userId = req.headers['x-user-id'] as string;
+
+    const chatClient = axios.create({
+      baseURL: process.env.CHAT_SERVICE_URL,
+      headers: {"x-user-id": userId}
+    })
+
+    await chatClient.post(`/messages`, {
       conversationId,
       role: "user",
       content: prompt,
@@ -18,6 +25,12 @@ export const agent = async (req: Request, res: Response) => {
     });
 
     const aiResponse = result.aiResponse;
+
+    await chatClient.post(`/messages`, {
+      conversationId,
+      role: "assistant",
+      content: aiResponse,
+    });
 
     return res.status(200).json(aiResponse);
   } catch (error) {

@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import userReducer from "./userSlice.ts";
 import conversationReducer from "./conversationSlice.ts";
+import messageReducer from "./messageSlice.ts";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     conversation: conversationReducer,
+    messages: messageReducer,
   },
 });
 

@@ -1,7 +1,7 @@
 import Artifact from "@/components/Artifact";
 import ChatArea from "@/components/ChatArea";
 import { LoginPopup } from "@/components/LoginPopup";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/SideBar";
 import { useAppSelector } from "@/redux/store";
 
 function Home() {
