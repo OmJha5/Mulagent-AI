@@ -12,15 +12,16 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
-  addConversation,
   setConversations,
   setSelectedConversation,
+  type Conversation,
 } from "@/redux/conversationSlice.ts";
+import { setMessages } from "@/redux/messageSlice";
+import getMessages from "@/features/getMessages";
 import { setUserdata } from "@/redux/userSlice";
 import { getConversations } from "@/features/getConversations";
 import logOut from "@/features/logout";
 import { useAppDispatch, useAppSelector } from "@/redux/store.ts";
-import { createConversation } from "@/features/createConversations.ts";
 
 function SideBar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -32,6 +33,20 @@ function SideBar() {
   const { userData } = useAppSelector((state) => state.user);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const handleNewChat = () => {
+    dispatch(setSelectedConversation(null));
+    dispatch(setMessages([]));
+    setMobileOpen(false);
+  };
+
+  const handleSelectConversation = async (conv: Conversation) => {
+    setMobileOpen(false);
+    if (selectedConversation?._id === conv?._id) return;
+    dispatch(setSelectedConversation(conv));
+    const data = await getMessages(conv?._id);
+    dispatch(setMessages(data || []));
+  };
+
   useEffect(() => {
     const getConv = async () => {
       const data = await getConversations();
@@ -39,11 +54,6 @@ function SideBar() {
     };
     getConv();
   }, [dispatch, userData]);
-
-  const handleCreateConversation = async () => {
-    const data = await createConversation();
-    dispatch(addConversation(data));
-  };
 
   if (collapsed) {
     return (
@@ -57,7 +67,7 @@ function SideBar() {
 
         <button
           className="flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
-          onClick={() => dispatch(setSelectedConversation(null))}
+          onClick={handleNewChat}
         >
           <Plus size={18} />
         </button>
@@ -68,7 +78,7 @@ function SideBar() {
             return (
               <div
                 key={conv?._id}
-                onClick={() => dispatch(setSelectedConversation(conv))}
+                onClick={() => handleSelectConversation(conv)}
                 className={`flex items-center justify-center w-full h-9 rounded-lg cursor-pointer transition ${
                   isActive
                     ? "bg-indigo-600/20 text-indigo-400"
@@ -139,7 +149,7 @@ function SideBar() {
 
             <button
               className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer"
-              onClick={handleCreateConversation}
+              onClick={handleNewChat}
             >
               <PenSquare size={16} />
             </button>
@@ -148,7 +158,7 @@ function SideBar() {
           <div className="p-3">
             <button
               className="w-full flex items-center justify-center gap-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg py-2.5 transition cursor-pointer"
-              onClick={handleCreateConversation}
+              onClick={handleNewChat}
             >
               <Plus size={16} />
               New Chat
@@ -165,7 +175,7 @@ function SideBar() {
               return (
                 <div
                   key={conv?._id}
-                  onClick={() => dispatch(setSelectedConversation(conv))}
+                  onClick={() => handleSelectConversation(conv)}
                   className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition text-sm ${
                     isActive
                       ? "bg-indigo-600/15 text-white border border-indigo-500/30"

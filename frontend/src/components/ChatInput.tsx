@@ -3,24 +3,52 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import sendPrompt from "@/features/sendPrompt";
 import { addMessage } from "@/redux/messageSlice";
+import { createConversation } from "@/features/createConversations";
+import {
+  addConversation,
+  setSelectedConversation,
+} from "@/redux/conversationSlice";
 
 function ChatInput() {
   const [value, setValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { selectedConversation } = useAppSelector(
     (state) => state.conversation,
   );
   const dispatch = useAppDispatch();
 
   const handleSendPrompt = async () => {
-    if (!selectedConversation) return;
+    if (!value.trim() || isLoading) return;
 
-    dispatch(addMessage({ role: "user", content: value }));
+    const promptText = value.trim();
     setValue("");
-    const data = await sendPrompt({
-      prompt: value,
-      conversationId: selectedConversation?._id,
-    });
-    dispatch(addMessage({ role: "assistant", content: data }));
+    setIsLoading(true);
+
+    try {
+      let conversation = selectedConversation;
+
+      if (!conversation) {
+        conversation = await createConversation();
+        if (!conversation?._id) return;
+        dispatch(addConversation(conversation));
+        dispatch(setSelectedConversation(conversation));
+      }
+
+      dispatch(addMessage({ role: "user", content: promptText }));
+
+      const data = await sendPrompt({
+        prompt: promptText,
+        conversationId: conversation._id,
+      });
+
+      if (data) {
+        dispatch(addMessage({ role: "assistant", content: data }));
+      }
+    } catch (error) {
+      console.error("Failed to send prompt:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -29,11 +57,12 @@ function ChatInput() {
         <div className="flex flex-col gap-2 bg-zinc-900/60 hover:bg-zinc-900/80 focus-within:bg-zinc-900/90 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/15 border border-zinc-800/90 rounded-2xl p-3 sm:p-4 shadow-lg shadow-black/20 transition-all duration-200">
           <textarea
             placeholder="Ask anything..."
+            disabled={isLoading}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                if (value.trim()) handleSendPrompt();
+                if (value.trim() && !isLoading) handleSendPrompt();
               }
             }}
             value={value}
@@ -60,10 +89,10 @@ function ChatInput() {
 
             <button
               type="button"
-              disabled={!value.trim()}
+              disabled={!value.trim() || isLoading}
               onClick={handleSendPrompt}
               className={`flex items-center justify-center w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-xl transition-all duration-200 ${
-                value.trim()
+                value.trim() && !isLoading
                   ? "bg-linear-to-br from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-md shadow-indigo-600/25 active:scale-95 cursor-pointer"
                   : "bg-zinc-800/50 text-zinc-600 cursor-not-allowed"
               }`}
