@@ -6,6 +6,8 @@ export const agentState = Annotation.Root({
   agent: Annotation<string>(),
   conversationId: Annotation<string>(),
   userId: Annotation<string>(),
+  searchResults: Annotation<string[]>(),
+  searchImages: Annotation<string[]>(),
 });
 
 export type AgentState = typeof agentState.State;

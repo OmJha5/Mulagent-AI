@@ -8,10 +8,12 @@ import {
   addConversation,
   setSelectedConversation,
 } from "@/redux/conversationSlice";
+import { agentLabel, agents } from "@/constants/constants";
 
 function ChatInput() {
   const [value, setValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState(agentLabel.auto);
   const { selectedConversation } = useAppSelector(
     (state) => state.conversation,
   );
@@ -34,15 +36,16 @@ function ChatInput() {
         dispatch(setSelectedConversation(conversation));
       }
 
-      dispatch(addMessage({ role: "user", content: promptText }));
+      dispatch(addMessage({ role: "user", content: promptText, images: [] }));
 
       const data = await sendPrompt({
         prompt: promptText,
         conversationId: conversation._id,
+        agent: selectedAgent || agentLabel.auto,
       });
 
-      if (data) {
-        dispatch(addMessage({ role: "assistant", content: data }));
+      if (data && data.botResponse) {
+        dispatch(addMessage({ role: "assistant", content: data.botResponse , images: data.images}));
       }
     } catch (error) {
       console.error("Failed to send prompt:", error);
@@ -55,6 +58,35 @@ function ChatInput() {
     <footer className="w-full px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-[#0d0f14]/80 backdrop-blur-md border-t border-zinc-800/80">
       <div className="max-w-4xl mx-auto w-full flex flex-col gap-1.5">
         <div className="flex flex-col gap-2 bg-zinc-900/60 hover:bg-zinc-900/80 focus-within:bg-zinc-900/90 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/15 border border-zinc-800/90 rounded-2xl p-3 sm:p-4 shadow-lg shadow-black/20 transition-all duration-200">
+          {/* Agent options */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full">
+            {agents.map((agent) => {
+              const isActive = selectedAgent === agent.label;
+              const Icon = agent.icon;
+              return (
+                <button
+                  key={agent.id}
+                  type="button"
+                  onClick={() => setSelectedAgent(agent.label)}
+                  className={`group inline-flex shrink-0 items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-medium border cursor-pointer select-none transition-all duration-150 active:scale-95 ${
+                    isActive
+                      ? "bg-linear-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-sm shadow-indigo-500/30"
+                      : "bg-zinc-800/40 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border-zinc-700/50 hover:border-zinc-600/70"
+                  }`}
+                >
+                  <Icon
+                    className={`w-3.5 h-3.5 shrink-0 transition-colors duration-150 ${
+                      isActive
+                        ? "text-white"
+                        : "text-zinc-400 group-hover:text-zinc-200"
+                    }`}
+                  />
+                  <span className="capitalize">{agent.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
           <textarea
             placeholder="Ask anything..."
             disabled={isLoading}

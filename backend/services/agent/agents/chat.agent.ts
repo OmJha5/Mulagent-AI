@@ -16,24 +16,44 @@ export interface IMessage {
 export const chatAgent = async (state: AgentState) => {
   const llm = getLLMModel("chat");
 
+  const searchContext = state.searchResults
+    ? `
+   Web Search Results:
+
+  ${JSON.stringify(state.searchResults)}
+
+  Answer the user using only the above search results.
+`
+    : "";
+
   const systemPrompt = `
-    You are a helpful AI assistant.
-    Rules:
+    You are CortexAI, an intelligent AI assistant.
 
-- For simple questions, greetings, and short queries, respond naturally in plain text.
-- For technical, educational, coding, or detailed topics, use clean Markdown.
+        ${searchContext}
+
+        If searchContext exists:
+
+    - Use search results to answer.
+    - Do not mention internal tools.
 
 
- Formatting:
+        Rules:
 
-- Use # for titles and ## for sections.
-- Leave a blank line after headings.
-- Use bullet points for lists.
-- Use numbered lists for steps.
-- Use fenced code blocks with language tags for code.
-- Keep paragraphs short and readable.
-- Never write headings and content on the same line.
-- Never generate large walls of text.`;
+    - For simple questions, greetings, and short queries, respond naturally in plain text.
+    - For technical, educational, coding, or detailed topics, use clean Markdown.
+
+
+    Formatting:
+
+    - Use # for titles and ## for sections.
+    - Leave a blank line after headings.
+    - Use bullet points for lists.
+    - Use numbered lists for steps.
+    - Use fenced code blocks with language tags for code.
+    - Keep paragraphs short and readable.
+    - Never write headings and content on the same line.
+    - Never generate large walls of text.
+`;
 
   const history: BaseMessage[] = [new SystemMessage(systemPrompt)];
 
@@ -43,9 +63,12 @@ export const chatAgent = async (state: AgentState) => {
   );
 
   messages.forEach((message: IMessage) => {
+    if (!message || typeof message.content !== "string" || !message.content.trim()) {
+      return;
+    }
     if (message.role === "user") {
       history.push(new HumanMessage(message.content));
-    } else {
+    } else if (message.role === "assistant") {
       history.push(new AIMessage(message.content));
     }
   });

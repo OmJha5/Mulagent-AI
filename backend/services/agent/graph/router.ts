@@ -1,7 +1,16 @@
 import { getLLMModel } from "../config/llmModels.ts";
+import { agentLabel } from "../constants/constants.ts";
 import { type AgentState } from "./state.ts";
 
 export const router = async (state: AgentState) => {
+  // if agent is already selected, return it
+  if (state.agent && state.agent !== agentLabel.auto) {
+    return {
+      ...state,
+      agent: state.agent,
+    };
+  }
+
   const llm = getLLMModel("router");
   const prompt = `You are an agent router.
 

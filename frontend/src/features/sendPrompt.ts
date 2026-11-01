@@ -3,6 +3,7 @@ import { api } from "@/utils/axios";
 interface ISendPrompt {
   prompt: string;
   conversationId: string;
+  agent: string;
 }
 
 async function sendPrompt(payload: ISendPrompt) {

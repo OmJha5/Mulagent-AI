@@ -38,6 +38,15 @@ export const saveMessageSchema = z.object({
     .trim()
     .min(1, "Message content cannot be empty")
     .max(20000, "Message content cannot exceed 20,000 characters"),
+  images: z
+    .union([
+      z.array(z.string().trim()),
+      z
+        .string()
+        .trim()
+        .transform((val) => (val ? [val] : [])),
+    ])
+    .default([]), // <-- returns [] if images is omitted in the request
 });
 
 export const conversationIdParamSchema = z.object({

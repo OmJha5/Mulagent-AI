@@ -25,7 +25,7 @@ export const saveMessage = async (req: Request, res: Response) => {
       });
     }
 
-    const { conversationId, role, content } = saveMessageSchema.parse(req.body);
+    const { conversationId, role, content, images } = saveMessageSchema.parse(req.body);
 
     // Verify conversation exists and belongs to the authenticated user
     const conversation = await Conversation.findOne({
@@ -45,6 +45,7 @@ export const saveMessage = async (req: Request, res: Response) => {
       conversationId,
       role,
       content,
+      images,
     });
 
     // Touch conversation updatedAt so it appears at top of conversation lists

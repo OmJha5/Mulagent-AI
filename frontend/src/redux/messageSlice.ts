@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 export interface IMessage {
   role: "user" | "assistant";
   content: string;
+  images: string[];
 }
 
 interface IUserConversationMessages {
