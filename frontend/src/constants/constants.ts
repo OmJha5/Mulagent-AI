@@ -61,3 +61,10 @@ export const agentLabel = {
   vision: "vision",
   search: "search",
 };
+
+export const messageRole = {
+  user: "user",
+  assistant: "assistant",
+} as const;
+
+export type MessageRole = (typeof messageRole)[keyof typeof messageRole];

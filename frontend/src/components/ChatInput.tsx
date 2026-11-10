@@ -8,7 +8,7 @@ import {
   addConversation,
   setSelectedConversation,
 } from "@/redux/conversationSlice";
-import { agentLabel, agents } from "@/constants/constants";
+import { agentLabel, agents, messageRole } from "@/constants/constants";
 
 function ChatInput() {
   const [value, setValue] = useState("");
@@ -36,7 +36,7 @@ function ChatInput() {
         dispatch(setSelectedConversation(conversation));
       }
 
-      dispatch(addMessage({ role: "user", content: promptText, images: [] }));
+      dispatch(addMessage({ role: messageRole.user, content: promptText, images: [] }));
 
       const data = await sendPrompt({
         prompt: promptText,
@@ -45,7 +45,13 @@ function ChatInput() {
       });
 
       if (data && data.botResponse) {
-        dispatch(addMessage({ role: "assistant", content: data.botResponse , images: data.images}));
+        dispatch(
+          addMessage({
+            role: messageRole.assistant,
+            content: data.botResponse,
+            images: data.images,
+          }),
+        );
       }
     } catch (error) {
       console.error("Failed to send prompt:", error);

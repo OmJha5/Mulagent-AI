@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
+import type { MessageRole } from "@/constants/constants";
 
 export interface IMessage {
-  role: "user" | "assistant";
+  role: MessageRole;
   content: string;
   images: string[];
 }

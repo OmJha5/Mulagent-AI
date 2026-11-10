@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
+  addConversation,
   setConversations,
   setSelectedConversation,
   type Conversation,
@@ -20,6 +21,7 @@ import { setMessages } from "@/redux/messageSlice";
 import getMessages from "@/features/getMessages";
 import { setUserdata } from "@/redux/userSlice";
 import { getConversations } from "@/features/getConversations";
+import { createConversation } from "@/features/createConversations";
 import logOut from "@/features/logout";
 import { useAppDispatch, useAppSelector } from "@/redux/store.ts";
 
@@ -32,11 +34,20 @@ function SideBar() {
   );
   const { userData } = useAppSelector((state) => state.user);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [creatingChat, setCreatingChat] = useState(false);
 
-  const handleNewChat = () => {
-    dispatch(setSelectedConversation(null));
-    dispatch(setMessages([]));
+  const handleNewChat = async () => {
+    if (creatingChat) return;
     setMobileOpen(false);
+    setCreatingChat(true);
+    try {
+      const data = await createConversation();
+      dispatch(addConversation(data));
+      dispatch(setSelectedConversation(data));
+      dispatch(setMessages([]));
+    } finally {
+      setCreatingChat(false);
+    }
   };
 
   const handleSelectConversation = async (conv: Conversation) => {
@@ -66,8 +77,9 @@ function SideBar() {
         </button>
 
         <button
-          className="flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+          className="flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50"
           onClick={handleNewChat}
+          disabled={creatingChat}
         >
           <Plus size={18} />
         </button>
@@ -148,8 +160,9 @@ function SideBar() {
             </span>
 
             <button
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer"
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer disabled:opacity-50"
               onClick={handleNewChat}
+              disabled={creatingChat}
             >
               <PenSquare size={16} />
             </button>
@@ -157,8 +170,9 @@ function SideBar() {
 
           <div className="p-3">
             <button
-              className="w-full flex items-center justify-center gap-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg py-2.5 transition cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg py-2.5 transition cursor-pointer disabled:opacity-50"
               onClick={handleNewChat}
+              disabled={creatingChat}
             >
               <Plus size={16} />
               New Chat
