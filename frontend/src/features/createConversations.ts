@@ -5,7 +5,7 @@ export const createConversation = async () => {
     const { data } = await api.post("/api/chat/conversations");
     return data.conversation;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 };

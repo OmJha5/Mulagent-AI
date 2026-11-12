@@ -6,7 +6,6 @@ import { addOneMessageToMemory } from "../config/memory.ts";
 export const agent = async (req: Request, res: Response) => {
   try {
     const { prompt, conversationId, agent } = req.body;
-    console.log(prompt, conversationId, agent);
 
     const userId = req.headers["x-user-id"] as string;
 

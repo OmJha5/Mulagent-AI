@@ -5,6 +5,6 @@ export const connectToDB = async () => {
         await mongoose.connect(process.env.MONGO_URL!);
         console.log("Connected Auth service to MongoDB");
     } catch (err) {
-        console.log(`Error in connecting to MongoDB ${JSON.stringify(err)}`);
+        console.error(`Error in connecting to MongoDB ${JSON.stringify(err)}`);
     }
 };

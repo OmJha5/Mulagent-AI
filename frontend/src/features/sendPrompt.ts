@@ -23,7 +23,7 @@ async function sendPrompt(
     );
     return data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return null;
   }
 }

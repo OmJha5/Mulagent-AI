@@ -15,7 +15,7 @@ export const getConversationMessages = async (
     );
     return result?.data?.messages;
   } catch (error) {
-    console.log("Error in fetching conversation messages :", error);
+    console.error("Error in fetching conversation messages :", error);
     return [];
   }
 };

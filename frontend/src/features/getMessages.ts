@@ -8,7 +8,7 @@ async function getMessages(conversationId: string): Promise<IMessage[]> {
     );
     return data.messages ?? [];
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 }

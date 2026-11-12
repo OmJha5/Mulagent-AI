@@ -5,7 +5,7 @@ const getCurrentUser = async () => {
     const { data } = await api.get("/api/getCurrentUser");
     return data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return null;
   }
 };

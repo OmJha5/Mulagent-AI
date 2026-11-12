@@ -4,7 +4,7 @@ async function logOut() {
   try {
     await api.get("/api/auth/logout");
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 

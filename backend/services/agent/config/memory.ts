@@ -21,7 +21,7 @@ export const getConversationMemory = async (
     await redis.set(key, JSON.stringify(last20Messages), "EX", 24 * 60 * 60);
     return last20Messages;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 };
@@ -46,6 +46,6 @@ export const addOneMessageToMemory = async (
 
     await redis.set(key, JSON.stringify([message]), "EX", 24 * 60 * 60);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };

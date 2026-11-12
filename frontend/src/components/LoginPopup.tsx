@@ -13,7 +13,7 @@ export const LoginPopup = () => {
       const { data } = await api.post("/api/auth/login", { token });
       dispatch(setUserdata(data));
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
