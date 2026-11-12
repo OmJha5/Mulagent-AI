@@ -3,15 +3,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import {
-  Bot,
-  Check,
-  Code2,
-  Copy,
-  ExternalLink,
-  User,
-  X,
-} from "lucide-react";
+import { Bot, Check, Code2, Copy, ExternalLink, User, X } from "lucide-react";
 import { messageRole, type MessageRole } from "@/constants/constants";
 import { setArtifacts, type IArtifact } from "@/redux/messageSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
@@ -77,7 +69,7 @@ function MessageBubble({
         )}
 
         <div
-          className={`w-fit min-w-0 px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl wrap-break-word overflow-hidden text-sm sm:text-base leading-relaxed transition-all shadow-xs ${
+          className={`w-fit min-w-0 px-4 mb-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl wrap-break-word overflow-hidden text-sm sm:text-base leading-relaxed transition-all shadow-xs ${
             isUser
               ? "max-w-[88%] sm:max-w-[80%] md:max-w-[72%] bg-linear-to-br from-indigo-600 via-indigo-600 to-violet-700 text-white rounded-tr-xs shadow-indigo-600/15 border border-indigo-500/20"
               : "max-w-full bg-zinc-900/70 border border-zinc-800/80 text-zinc-100 rounded-tl-xs shadow-black/20"
