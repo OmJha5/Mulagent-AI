@@ -17,7 +17,7 @@ function ArtifactFileTabs({
     <div
       role="tablist"
       aria-label="Artifact files"
-      className="flex items-center border-b border-zinc-800/80 bg-[#0b0d12] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden shrink-0"
+      className="flex items-center border-b border-zinc-800/80 bg-[#0b0d12] overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden shrink-0"
     >
       {files.map((file, index) => {
         const isActive = activeFileIndex === index;
