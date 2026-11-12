@@ -33,3 +33,10 @@ export const codingLlmConfig = {
 export const codingJsonResponseFormat = {
   type: "json_object",
 } as const;
+
+export const visionConfig = {
+  pollinationsBaseUrl: "https://gen.pollinations.ai/image",
+  pollinationsModel: "flux",
+  imageRequestTimeoutMs: 60_000, // Aborts the request if image is not generated within 60_000 ms = 60 seconds
+  signedUrlExpiresInMinutes: 1440, // 24 hours
+} as const;

@@ -5,8 +5,11 @@ import {
   SystemMessage,
 } from "@langchain/core/messages";
 import { getLLMModel } from "../config/llmModels.ts";
-import { type AgentState } from "../graph/state.ts";
 import { getConversationMemory } from "../config/memory.ts";
+import { agentLabel } from "../constants/constants.ts";
+import { type AgentState } from "../graph/state.ts";
+import { getChatSystemPrompt } from "../prompts/chat.prompts.ts";
+import { extractMessageText } from "../utils/parseGeneratedProject.ts";
 
 export interface IMessage {
   role: "user" | "assistant";
@@ -14,71 +17,59 @@ export interface IMessage {
 }
 
 export const chatAgent = async (state: AgentState) => {
-  const llm = getLLMModel("chat");
+  const userPrompt = state.prompt?.trim();
+  if (!userPrompt) {
+    return {
+      ...state,
+      aiResponse: "Please provide a message to continue.",
+    };
+  }
 
-  const searchContext = state.searchResults
-    ? `
-   Web Search Results:
+  try {
+    const llm = getLLMModel(agentLabel.chat);
+    const systemPrompt = getChatSystemPrompt(state.searchResults);
 
-  ${JSON.stringify(state.searchResults)}
+    const history: BaseMessage[] = [new SystemMessage(systemPrompt)];
 
-  Answer the user using only the above search results.
-`
-    : "";
+    const messages = await getConversationMemory(
+      state.conversationId,
+      state.userId,
+    );
 
-  const systemPrompt = `
-    You are CortexAI, an intelligent AI assistant.
-
-        ${searchContext}
-
-        If searchContext exists:
-
-    - Use search results to answer.
-    - Do not mention internal tools.
-
-
-        Rules:
-
-    - For simple questions, greetings, and short queries, respond naturally in plain text.
-    - For technical, educational, coding, or detailed topics, use clean Markdown.
-
-
-    Formatting:
-
-    - Use # for titles and ## for sections.
-    - Leave a blank line after headings.
-    - Use bullet points for lists.
-    - Use numbered lists for steps.
-    - Use fenced code blocks with language tags for code.
-    - Keep paragraphs short and readable.
-    - Never write headings and content on the same line.
-    - Never generate large walls of text.
-`;
-
-  const history: BaseMessage[] = [new SystemMessage(systemPrompt)];
-
-  const messages = await getConversationMemory(
-    state.conversationId,
-    state.userId,
-  );
-
-  messages.forEach((message: IMessage) => {
-    if (!message || typeof message.content !== "string" || !message.content.trim()) {
-      return;
+    if (Array.isArray(messages)) {
+      messages.forEach((message: IMessage) => {
+        if (
+          !message ||
+          typeof message.content !== "string" ||
+          !message.content.trim()
+        ) {
+          return;
+        }
+        if (message.role === "user") {
+          history.push(new HumanMessage(message.content));
+        } else if (message.role === "assistant") {
+          history.push(new AIMessage(message.content));
+        }
+      });
     }
-    if (message.role === "user") {
-      history.push(new HumanMessage(message.content));
-    } else if (message.role === "assistant") {
-      history.push(new AIMessage(message.content));
-    }
-  });
 
-  history.push(new HumanMessage(state.prompt));
+    history.push(new HumanMessage(userPrompt));
 
-  const response = await llm.invoke(history);
+    const response = await llm.invoke(history);
 
-  return {
-    ...state,
-    aiResponse: response.content,
-  };
+    return {
+      ...state,
+      aiResponse: extractMessageText(response.content),
+    };
+  } catch (error) {
+    console.error("Error in chat agent:", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to generate response";
+
+    return {
+      ...state,
+      aiResponse: `Failed to generate response: ${errorMessage}`,
+    };
+  }
 };
