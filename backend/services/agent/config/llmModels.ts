@@ -2,6 +2,7 @@ import "dotenv/config";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatGroq } from "@langchain/groq";
 import { ChatOpenRouter } from "@langchain/openrouter";
+import { codingLlmConfig } from "../constants/constants.ts";
 
 const groqModel = new ChatGroq({
   model: "openai/gpt-oss-120b",
@@ -12,10 +13,12 @@ const geminiModel = new ChatGoogleGenerativeAI({
 });
 
 const openrouter = new ChatOpenRouter({
-  model: "deepseek/deepseek-chat",
-  temperature: 0,
-  maxTokens: 2500,
+  model: codingLlmConfig.model,
+  temperature: codingLlmConfig.temperature,
+  maxTokens: codingLlmConfig.maxTokens,
 });
+
+export const getCodingLLMModel = (): ChatOpenRouter => openrouter;
 
 export const getLLMModel = (agent: string) => {
   switch (agent) {

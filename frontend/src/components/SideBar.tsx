@@ -17,13 +17,14 @@ import {
   setSelectedConversation,
   type Conversation,
 } from "@/redux/conversationSlice.ts";
-import { setMessages } from "@/redux/messageSlice";
+import { setArtifacts, setMessages } from "@/redux/messageSlice";
 import getMessages from "@/features/getMessages";
 import { setUserdata } from "@/redux/userSlice";
 import { getConversations } from "@/features/getConversations";
 import { createConversation } from "@/features/createConversations";
 import logOut from "@/features/logout";
 import { useAppDispatch, useAppSelector } from "@/redux/store.ts";
+import { getLatestArtifactsFromMessages } from "@/utils/artifact";
 
 function SideBar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -45,6 +46,7 @@ function SideBar() {
       dispatch(addConversation(data));
       dispatch(setSelectedConversation(data));
       dispatch(setMessages([]));
+      dispatch(setArtifacts([]));
     } finally {
       setCreatingChat(false);
     }
@@ -53,9 +55,14 @@ function SideBar() {
   const handleSelectConversation = async (conv: Conversation) => {
     setMobileOpen(false);
     if (selectedConversation?._id === conv?._id) return;
+
     dispatch(setSelectedConversation(conv));
+
     const data = await getMessages(conv?._id);
-    dispatch(setMessages(data || []));
+
+    const fetchedMessages = data || [];
+    dispatch(setMessages(fetchedMessages));
+    dispatch(setArtifacts(getLatestArtifactsFromMessages(fetchedMessages)));
   };
 
   useEffect(() => {
@@ -152,7 +159,7 @@ function SideBar() {
             </button>
 
             <span className="text-base font-semibold text-white tracking-tight flex-1">
-              CortexAI
+              Mulagent AI
             </span>
 
             <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
@@ -240,6 +247,9 @@ function SideBar() {
                     onClick={() => {
                       logOut();
                       dispatch(setUserdata(null));
+                      dispatch(setSelectedConversation(null));
+                      dispatch(setMessages([]));
+                      dispatch(setArtifacts([]));
                     }}
                   >
                     <LogOut size={16} />

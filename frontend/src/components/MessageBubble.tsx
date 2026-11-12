@@ -3,19 +3,42 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Bot, Check, Copy, ExternalLink, User, X } from "lucide-react";
+import {
+  Bot,
+  Check,
+  Code2,
+  Copy,
+  ExternalLink,
+  User,
+  X,
+} from "lucide-react";
 import { messageRole, type MessageRole } from "@/constants/constants";
+import { setArtifacts, type IArtifact } from "@/redux/messageSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
 
 interface IMessageBubble {
   role: MessageRole;
   content: string;
   images?: string[];
+  artifacts?: IArtifact[];
 }
 
-function MessageBubble({ role, content, images = [] }: IMessageBubble) {
+function MessageBubble({
+  role,
+  content,
+  images = [],
+  artifacts = [],
+}: IMessageBubble) {
   const isUser = role === messageRole.user;
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [lightBox, setLightBox] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const { artifacts: activeArtifacts } = useAppSelector(
+    (state) => state.messages,
+  );
+  const primaryArtifact = artifacts[0];
+  const isArtifactSelected =
+    Boolean(primaryArtifact) && activeArtifacts[0]?.id === primaryArtifact?.id;
 
   const copyCode = async (value: string) => {
     try {
@@ -208,6 +231,42 @@ function MessageBubble({ role, content, images = [] }: IMessageBubble) {
           >
             {content}
           </Markdown>
+
+          {!isUser && primaryArtifact && (
+            <button
+              type="button"
+              onClick={() => dispatch(setArtifacts(artifacts))}
+              className={`mt-3 w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border text-left transition cursor-pointer ${
+                isArtifactSelected
+                  ? "bg-indigo-500/15 border-indigo-500/40 text-zinc-100"
+                  : "bg-zinc-950/60 border-zinc-800 hover:border-indigo-500/30 hover:bg-zinc-900/90 text-zinc-200"
+              }`}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500/15 border border-indigo-500/25 shrink-0">
+                  <Code2 className="w-4 h-4 text-indigo-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium truncate">
+                    {primaryArtifact.title || "Generated Project"}
+                  </p>
+                  <p className="text-xs text-zinc-400">
+                    {primaryArtifact.files?.length ?? 0}{" "}
+                    {primaryArtifact.files?.length === 1 ? "file" : "files"}
+                  </p>
+                </div>
+              </div>
+              <span
+                className={`text-xs font-medium px-2.5 py-1 rounded-lg shrink-0 ${
+                  isArtifactSelected
+                    ? "bg-indigo-500/20 text-indigo-300"
+                    : "bg-zinc-800 text-zinc-300"
+                }`}
+              >
+                {isArtifactSelected ? "Viewing" : "Open"}
+              </span>
+            </button>
+          )}
         </div>
 
         {isUser && (

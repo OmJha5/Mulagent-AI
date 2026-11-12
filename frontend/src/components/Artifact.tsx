@@ -1,10 +1,51 @@
+import { useState } from "react";
+import { motion } from "motion/react";
+import {
+  artifactMotionConfig,
+  artifactPanelSize,
+} from "@/constants/constants";
+import { useAppSelector } from "@/redux/store";
+import ArtifactCollapsedStrip from "@/components/artifact/ArtifactCollapsedStrip";
+import ArtifactPanelBody from "@/components/artifact/ArtifactPanelBody";
+
 function Artifact() {
+  const { artifacts } = useAppSelector((state) => state.messages);
+  const [collapsedArtifactId, setCollapsedArtifactId] = useState<number | null>(
+    null,
+  );
+
+  const currentArtifact = artifacts[0];
+  if (!currentArtifact) return null;
+
+  const isCollapsed = collapsedArtifactId === currentArtifact.id;
+
   return (
-    <div className="w-80 lg:w-96 h-full border-l border-zinc-800 hidden md:flex flex-col bg-[#0d0f14] shrink-0">
-      <div className="flex-1 flex items-center justify-center text-zinc-500">
-        Artifact
-      </div>
-    </div>
+    <motion.div
+      initial={{ width: artifactPanelSize.expandedWidth }}
+      animate={{
+        width: isCollapsed
+          ? artifactPanelSize.collapsedWidth
+          : artifactPanelSize.expandedWidth,
+      }}
+      transition={{
+        duration: artifactMotionConfig.panelTransitionDuration,
+        ease: "easeInOut",
+      }}
+      className="hidden md:flex h-full border-l border-zinc-800/80 flex-col overflow-hidden shrink-0 bg-[#0d0f14]"
+    >
+      {isCollapsed ? (
+        <ArtifactCollapsedStrip
+          title={currentArtifact.title}
+          onExpand={() => setCollapsedArtifactId(null)}
+        />
+      ) : (
+        <ArtifactPanelBody
+          key={currentArtifact.id}
+          artifact={currentArtifact}
+          onCollapse={() => setCollapsedArtifactId(currentArtifact.id)}
+        />
+      )}
+    </motion.div>
   );
 }
 

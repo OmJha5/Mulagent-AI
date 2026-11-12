@@ -2,7 +2,7 @@ import { Mic, Paperclip, Send } from "lucide-react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import sendPrompt from "@/features/sendPrompt";
-import { addMessage } from "@/redux/messageSlice";
+import { addMessage, setArtifacts } from "@/redux/messageSlice";
 import { createConversation } from "@/features/createConversations";
 import {
   addConversation,
@@ -30,6 +30,7 @@ function ChatInput() {
       let conversation = selectedConversation;
 
       if (!conversation) {
+        dispatch(setArtifacts([]));
         conversation = await createConversation();
         if (!conversation?._id) return;
         dispatch(addConversation(conversation));
@@ -44,14 +45,21 @@ function ChatInput() {
         agent: selectedAgent || agentLabel.auto,
       });
 
-      if (data && data.botResponse) {
-        dispatch(
-          addMessage({
-            role: messageRole.assistant,
-            content: data.botResponse,
-            images: data.images,
-          }),
-        );
+      if (data) {
+        if (data.artifacts && data.artifacts.length > 0) {
+          dispatch(setArtifacts(data.artifacts));
+        }
+
+        if (data.botResponse) {
+          dispatch(
+            addMessage({
+              role: messageRole.assistant,
+              content: data.botResponse,
+              images: data.images ?? [],
+              artifacts: data.artifacts ?? [],
+            }),
+          );
+        }
       }
     } catch (error) {
       console.error("Failed to send prompt:", error);

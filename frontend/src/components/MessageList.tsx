@@ -49,7 +49,12 @@ function MessageList() {
           <div className="space-y-6 sm:space-y-7">
             {messages.map((msg: IMessage, ind: number) => (
               <div key={ind}>
-                <MessageBubble role={msg.role} content={msg.content} images={msg.images || []} />
+                <MessageBubble
+                  role={msg.role}
+                  content={msg.content}
+                  images={msg.images || []}
+                  artifacts={msg.artifacts || []}
+                />
               </div>
             ))}
           </div>

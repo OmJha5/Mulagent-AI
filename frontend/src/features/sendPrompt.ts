@@ -1,14 +1,26 @@
+import type { IArtifact } from "@/redux/messageSlice";
 import { api } from "@/utils/axios";
 
-interface ISendPrompt {
+export interface ISendPromptPayload {
   prompt: string;
   conversationId: string;
   agent: string;
 }
 
-async function sendPrompt(payload: ISendPrompt) {
+export interface ISendPromptResponse {
+  botResponse: string;
+  images?: string[];
+  artifacts?: IArtifact[];
+}
+
+async function sendPrompt(
+  payload: ISendPromptPayload,
+): Promise<ISendPromptResponse | null> {
   try {
-    const { data } = await api.post("/api/agent/chat", payload);
+    const { data } = await api.post<ISendPromptResponse>(
+      "/api/agent/chat",
+      payload,
+    );
     return data;
   } catch (error) {
     console.log(error);

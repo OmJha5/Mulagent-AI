@@ -33,6 +33,7 @@ Rules:
 - Hover Effects
 - Beautiful spacing
 - Single page unless user asks otherwise.
+- Keep code clean and concise without repetitive boilerplate or inline base64 images (for sample lists like menus or products, include 4-6 items).
 
 IMAGES
 =========================

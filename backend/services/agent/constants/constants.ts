@@ -23,3 +23,13 @@ export const codingIntent = {
 export const artifactType = {
   project: "Project",
 } as const;
+
+export const codingLlmConfig = {
+  model: "deepseek/deepseek-chat",
+  temperature: 0,
+  maxTokens: 8192,
+} as const;
+
+export const codingJsonResponseFormat = {
+  type: "json_object",
+} as const;
