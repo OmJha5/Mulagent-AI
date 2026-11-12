@@ -28,6 +28,18 @@ export const updateConversationBodySchema = z.object({
     .max(100, "Title cannot exceed 100 characters"),
 });
 
+export const artifactFileSchema = z.object({
+  name: z.string(),
+  content: z.string(),
+});
+
+export const artifactSchema = z.object({
+  id: z.number(),
+  type: z.string(),
+  title: z.string(),
+  files: z.array(artifactFileSchema).default([]),
+});
+
 export const saveMessageSchema = z.object({
   conversationId: objectIdSchema,
   role: z.enum(["user", "assistant"], {
@@ -47,6 +59,10 @@ export const saveMessageSchema = z.object({
         .transform((val) => (val ? [val] : [])),
     ])
     .default([]), // <-- returns [] if images is omitted in the request
+  artifacts: z
+    .array(artifactSchema)
+    .nullish()
+    .transform((val) => val ?? []),
 });
 
 export const conversationIdParamSchema = z.object({

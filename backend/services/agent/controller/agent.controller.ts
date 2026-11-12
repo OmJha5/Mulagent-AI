@@ -46,12 +46,14 @@ export const agent = async (req: Request, res: Response) => {
         role: "assistant",
         content: aiResponse,
         images: result.searchImages || [],
+        artifacts: result.artifacts || [],
       });
     }
 
     return res.status(200).json({
       botResponse: aiResponse,
       images: result.searchImages || [],
+      artifacts: result.artifacts || [],
     });
   } catch (error) {
     return res.status(500).json({
