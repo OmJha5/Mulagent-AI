@@ -19,6 +19,12 @@ app.use(
 
 app.use(cookieParser());
 
+// Strip internal secret header from incoming external requests to prevent spoofing
+app.use((req: Request, _res: Response, next) => {
+  delete req.headers["x-internal-secret"];
+  next();
+});
+
 const PORT = process.env.PORT || 8000;
 
 // Current user endpoint handled directly at gateway level from session store

@@ -2,12 +2,28 @@ import axios from "axios";
 import { type Request, type Response } from "express";
 import { graph } from "../graph/graph.ts";
 import { addOneMessageToMemory } from "../config/memory.ts";
+import { agentRequestSchema } from "../validators/agent.validator.ts";
 
 export const agent = async (req: Request, res: Response) => {
   try {
-    const { prompt, conversationId, agent } = req.body;
-
     const userId = req.headers["x-user-id"] as string;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User ID is required",
+      });
+    }
+
+    const validation = agentRequestSchema.safeParse(req.body);
+    if (!validation.success) {
+      const issue = validation.error.issues[0];
+      return res.status(400).json({
+        success: false,
+        message: issue?.message || "Invalid request payload",
+      });
+    }
+
+    const { prompt, conversationId, agent: requestedAgent } = validation.data;
 
     const chatClient = axios.create({
       baseURL: process.env.CHAT_SERVICE_URL,
@@ -24,7 +40,7 @@ export const agent = async (req: Request, res: Response) => {
       prompt,
       conversationId,
       userId,
-      agent,
+      agent: requestedAgent,
     });
 
     const aiResponse = result.aiResponse;
@@ -55,9 +71,13 @@ export const agent = async (req: Request, res: Response) => {
       artifacts: result.artifacts || [],
     });
   } catch (error) {
+    console.error("Error in agent controller:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : `Agent error ${error}`;
+
     return res.status(500).json({
       success: false,
-      message: `Agent error ${error}`,
+      message: errorMessage,
     });
   }
 };

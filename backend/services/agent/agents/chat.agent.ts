@@ -10,6 +10,7 @@ import { agentLabel } from "../constants/constants.ts";
 import { type AgentState } from "../graph/state.ts";
 import { getChatSystemPrompt } from "../prompts/chat.prompts.ts";
 import { extractMessageText } from "../utils/parseGeneratedProject.ts";
+import { deductCredits } from "../utils/deductCredits.ts";
 
 export interface IMessage {
   role: "user" | "assistant";
@@ -56,6 +57,11 @@ export const chatAgent = async (state: AgentState) => {
     history.push(new HumanMessage(userPrompt));
 
     const response = await llm.invoke(history);
+
+    // Deduct credits on success (if search already ran, search already paid)
+    if (!state.searchResults || state.searchResults.length === 0) {
+      await deductCredits(state.userId, agentLabel.chat);
+    }
 
     return {
       ...state,

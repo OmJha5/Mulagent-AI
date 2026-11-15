@@ -41,6 +41,17 @@ export const visionConfig = {
   signedUrlExpiresInMinutes: 1440, // 24 hours
 } as const;
 
+export const agentCreditCosts = {
+  chat: 1,
+  search: 5,
+  coding: 10,
+  pdf: 10,
+  ppt: 10,
+  vision: 10,
+} as const;
+
+export type AgentType = keyof typeof agentCreditCosts;
+
 export const pdfConfig = {
   contentType: "application/pdf",
   filePrefix: "pdf/document",
@@ -97,4 +108,8 @@ export const pptConfig = {
     footerSlate: "94A3B8",
     cardLight: "EFF6FF",
   },
+} as const;
+
+export const internalServiceConfig = {
+  internalSecretHeader: "x-internal-secret",
 } as const;

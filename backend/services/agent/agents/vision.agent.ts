@@ -8,6 +8,7 @@ import { getVisionPrompt } from "../prompts/vision.prompts.ts";
 import { getFromS3 } from "../utils/getFromS3.ts";
 import { extractMessageText } from "../utils/parseGeneratedProject.ts";
 import { uploadToS3 } from "../utils/uploadToS3.ts";
+import { deductCredits } from "../utils/deductCredits.ts";
 
 const getImageExtension = (contentType: string): string => {
   if (contentType.includes("jpeg") || contentType.includes("jpg")) return "jpg";
@@ -83,6 +84,9 @@ export const visionAgent = async (state: AgentState) => {
     const expiresInHours = Math.floor(
       visionConfig.signedUrlExpiresInMinutes / 60,
     );
+
+    // Deduct credits ONLY after image was generated and uploaded to S3!
+    await deductCredits(state.userId, agentLabel.vision);
 
     return {
       ...state,

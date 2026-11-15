@@ -4,6 +4,7 @@ import { agentLabel, pdfConfig } from "../constants/constants.ts";
 import { type AgentState } from "../graph/state.ts";
 import { getPdfPrompt } from "../prompts/pdf.prompts.ts";
 import { generatePdf, parsePdfData } from "../utils/generatePdf.ts";
+import { deductCredits } from "../utils/deductCredits.ts";
 import { getFromS3 } from "../utils/getFromS3.ts";
 import { extractMessageText } from "../utils/parseGeneratedProject.ts";
 import { uploadToS3 } from "../utils/uploadToS3.ts";
@@ -37,6 +38,9 @@ export const pdfAgent = async (state: AgentState) => {
     const expiresInHours = Math.floor(
       pdfConfig.signedUrlExpiresInSeconds / 3600,
     );
+
+    // Deduct credits ONLY after PDF generation and S3 upload succeeded!
+    await deductCredits(state.userId, agentLabel.pdf);
 
     return {
       ...state,

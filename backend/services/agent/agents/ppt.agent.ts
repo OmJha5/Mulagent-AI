@@ -4,6 +4,7 @@ import { agentLabel, pptConfig } from "../constants/constants.ts";
 import { type AgentState } from "../graph/state.ts";
 import { getPptPrompt } from "../prompts/ppt.prompts.ts";
 import { generatePpt, parsePptData } from "../utils/generatePpt.ts";
+import { deductCredits } from "../utils/deductCredits.ts";
 import { getFromS3 } from "../utils/getFromS3.ts";
 import { extractMessageText } from "../utils/parseGeneratedProject.ts";
 import { uploadToS3 } from "../utils/uploadToS3.ts";
@@ -38,6 +39,9 @@ export const pptAgent = async (state: AgentState) => {
       pptConfig.signedUrlExpiresInSeconds / 3600,
     );
 
+    // Deduct credits ONLY after PPT generation and S3 upload succeeded!
+    await deductCredits(state.userId, agentLabel.ppt);
+
     return {
       ...state,
       aiResponse: `# ✅ Presentation Generated
@@ -52,7 +56,9 @@ _Link expires in ${expiresInHours} ${expiresInHours === 1 ? "hour" : "hours"}._`
     console.error("Error in ppt agent:", error);
 
     const errorMessage =
-      error instanceof Error ? error.message : "Failed to generate presentation";
+      error instanceof Error
+        ? error.message
+        : "Failed to generate presentation";
 
     return {
       ...state,

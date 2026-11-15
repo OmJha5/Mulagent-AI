@@ -15,6 +15,7 @@ import {
   extractMessageText,
   parseGeneratedProject,
 } from "../utils/parseGeneratedProject.ts";
+import { deductCredits } from "../utils/deductCredits.ts";
 
 export const codingAgent = async (state: AgentState) => {
   try {
@@ -55,6 +56,9 @@ export const codingAgent = async (state: AgentState) => {
         throw parseError;
       }
 
+      // Deduct credits ONLY after code generation & JSON parsing succeeded
+      await deductCredits(state.userId, agentLabel.coding);
+
       return {
         ...state,
         aiResponse: "Code Generated Successfully.",
@@ -72,6 +76,9 @@ export const codingAgent = async (state: AgentState) => {
     const llm = getLLMModel(agentLabel.coding);
     const res = await llm.invoke(getCodingMarkdownPrompt(intent, state.prompt));
     const data = extractMessageText(res.content);
+
+    // Deduct credits on markdown explanation success
+    await deductCredits(state.userId, agentLabel.coding);
 
     return {
       ...state,

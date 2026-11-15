@@ -6,6 +6,10 @@ export interface SessionUser {
   name: string;
   email: string;
   avatar: string;
+  plan?: string;
+  credits?: number;
+  totalCredits?: number;
+  planExpiresAt?: Date | string;
 }
 
 export const protect = async (
